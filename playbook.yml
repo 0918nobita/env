@@ -1,32 +1,24 @@
 ---
 - hosts: localhost
   tasks:
-    - become: true
-      apt:
-        update_cache: yes
-        upgrade: yes
-        autoremove: yes
-        autoclean: yes
-    - become: true
-      name: Install zsh and git
-      apt:
-        name:
-          - zsh
-          - git
-          - neofetch
-          - gh
+    - name: Install packages
+      include_tasks: "{{ ansible_facts['distribution'] }}.yml"
+
     - name: Create ~/github
       file:
         state: directory
         path: ~/github
+
     - name: Clone direnv/direnv
       git:
         repo: https://github.com/direnv/direnv.git
         dest: ~/github/direnv
+
     - name: Clone alacritty/alacritty
       git:
         repo: https://github.com/alacritty/alacritty.git
         dest: ~/github/alacritty
+
     - name: Clone tmux/tmux
       git:
         repo: https://github.com/tmux/tmux.git
