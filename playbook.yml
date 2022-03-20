@@ -13,6 +13,7 @@
         name:
           - zsh
           - git
+          - neofetch
     - name: Create ~/github
       file:
         state: directory
