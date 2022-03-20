@@ -1,0 +1,21 @@
+---
+- name: Clone direnv
+  git:
+    repo: https://github.com/direnv/direnv.git
+    dest: ~/github/direnv
+  async: 100
+  poll: 0
+
+- name: Clone alacritty
+  git:
+    repo: https://github.com/alacritty/alacritty.git
+    dest: ~/github/alacritty
+  async: 100
+  poll: 0
+
+- name: Clone tmux
+  git:
+    repo: https://github.com/tmux/tmux.git
+    dest: ~/github/tmux
+  async: 100
+  poll: 0

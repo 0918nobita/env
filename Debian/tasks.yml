@@ -4,11 +4,19 @@
     upgrade: yes
     autoremove: yes
     autoclean: yes
+
 - become: true
   name: Install zsh and git
   apt:
     name:
       - zsh
-      - git
       - neofetch
       - gh
+      - git
+
+- name: Create ~/github
+  file:
+    state: directory
+    path: ~/github
+
+- include_tasks: git_clone.yml
