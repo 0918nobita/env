@@ -1,4 +1,5 @@
 - become: true
+  name: Update/upgrade apt packages
   apt:
     update_cache: yes
     upgrade: yes
@@ -6,17 +7,12 @@
     autoclean: yes
 
 - become: true
-  name: Install zsh and git
+  name: Install apt packages
   apt:
     name:
       - zsh
       - neofetch
-      - gh
+      - gh  # GitHub CLI
       - git
-
-- name: Create ~/github
-  file:
-    state: directory
-    path: ~/github
 
 - include_tasks: git_clone.yml
