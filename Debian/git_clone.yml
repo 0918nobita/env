@@ -1,4 +1,9 @@
 ---
+- name: Create ~/github
+  file:
+    state: directory
+    path: ~/github
+
 - name: Clone direnv
   git:
     repo: https://github.com/direnv/direnv.git
