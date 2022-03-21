@@ -1,7 +1,18 @@
 open System.Diagnostics
 
-let p = Process.Start(ProcessStartInfo("git", "status"))
+let aptUpdate = ProcessStartInfo("sudo", "apt update")
+let aptUpgrade = ProcessStartInfo("sudo", "apt upgrade")
+let aptAutoClean = ProcessStartInfo("sudo", "apt autoclean")
+let aptAutoRemove = ProcessStartInfo("sudo", "apt autoremove")
 
-p.WaitForExitAsync()
-|> Async.AwaitTask
+let startAndWait (pInfo: ProcessStartInfo) =
+    Process.Start(pInfo).WaitForExitAsync()
+    |> Async.AwaitTask
+
+async {
+    do! startAndWait aptUpdate
+    do! startAndWait aptUpgrade
+    do! startAndWait aptAutoClean
+    do! startAndWait aptAutoRemove
+}
 |> Async.RunSynchronously
