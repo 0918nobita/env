@@ -4,32 +4,21 @@
 open System.Diagnostics
 open Microsoft.Extensions.Logging
 
-let startProcess filename args =
-    Process.Start(ProcessStartInfo(filename, args))
+let task name (logger: ILogger) filename args =
+    use _ = logger.BeginScope name
 
-let waitForProcess (p: Process) = p.WaitForExitAsync() |> Async.AwaitTask
+    let startInfo = ProcessStartInfo(filename, args)
+    startInfo.RedirectStandardOutput <- true
+    let p = new Process(StartInfo = startInfo)
 
-let aptUpdate (logger: ILogger) =
-    logger.LogInformation "apt update"
-    startProcess "sudo" "apt update" |> waitForProcess
+    p.OutputDataReceived.Add
+    <| fun args ->
+        if args.Data <> null then
+            logger.LogInformation args.Data
 
-let aptUpgrade (logger: ILogger) =
-    logger.LogInformation "apt upgrade"
-
-    startProcess "sudo" "apt upgrade"
-    |> waitForProcess
-
-let aptAutoClean (logger: ILogger) =
-    logger.LogInformation "apt autoclean"
-
-    startProcess "sudo" "apt autoclean"
-    |> waitForProcess
-
-let aptAutoRemove (logger: ILogger) =
-    logger.LogInformation "apt autoremove"
-
-    startProcess "sudo" "apt autoremove"
-    |> waitForProcess
+    p.Start() |> ignore
+    p.BeginOutputReadLine()
+    p.WaitForExitAsync() |> Async.AwaitTask
 
 let () =
     use loggerFactory =
@@ -41,10 +30,10 @@ let () =
 
     [ async {
           use _ = logger.BeginScope "apt"
-          do! aptUpdate logger
-          do! aptUpgrade logger
-          do! aptAutoClean logger
-          do! aptAutoRemove logger
+          do! task "update" logger "sudo" "apt-get update"
+          do! task "upgrade" logger "sudo" "apt-get upgrade"
+          do! task "autoclean" logger "sudo" "apt-get autoclean"
+          do! task "autoremove" logger "sudo" "apt-get autoremove"
       }
       async { logger.LogInformation "Hello, world!" } ]
     |> Async.Parallel
