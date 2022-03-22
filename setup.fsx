@@ -11,14 +11,27 @@ let task name (logger: ILogger) filename args =
     startInfo.RedirectStandardOutput <- true
     let p = new Process(StartInfo = startInfo)
 
-    p.OutputDataReceived.Add
-    <| fun args ->
-        if args.Data <> null then
-            logger.LogInformation args.Data
-
     p.Start() |> ignore
-    p.BeginOutputReadLine()
-    p.WaitForExitAsync() |> Async.AwaitTask
+
+    let memory = Array.zeroCreate<char> 256
+    let mutable shouldContinue = true
+
+    async {
+        while shouldContinue do
+            let! numBytes =
+                p.StandardOutput.ReadAsync(memory).AsTask()
+                |> Async.AwaitTask
+
+            if numBytes > 0 then
+                logger.LogInformation
+                <| (new string (memory, 0, numBytes)).TrimEnd()
+
+                shouldContinue <- true
+            else
+                shouldContinue <- false
+
+        do! p.WaitForExitAsync() |> Async.AwaitTask
+    }
 
 let () =
     use loggerFactory =
